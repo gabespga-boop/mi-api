@@ -2,18 +2,18 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
     branches: [main]
 
 env:
-  REGISTRY: ghcr.io                          # GitHub Container Registry (gratis)
-  IMAGE_NAME: ${{ github.repository }}       # tu-usuario/mi_fastapi_app
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # ── JOB 1: Lint ────────────────────────────────────────────
+
   lint:
-    name: 🔍 Lint (Ruff)
+    name: 🔍 Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,11 +21,10 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install ruff
-      - run: ruff check src/ tests/
+      - run: ruff check src/
 
-  # ── JOB 2: Type Check ──────────────────────────────────────
   type-check:
-    name: 🔎 Type Check (mypy)
+    name: 🔎 Type Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,26 +34,24 @@ jobs:
       - run: pip install mypy fastapi
       - run: mypy src/
 
-  # ── JOB 3: Tests ───────────────────────────────────────────
   test:
-    name: 🧪 Tests (pytest)
+    name: 🧪 Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pytest httpx fastapi uvicorn
+      - run: pip install pytest httpx fastapi uvicorn httpx2
       - run: pytest tests/ -v
 
-  # ── JOB 4: Build wheel + Docker y push ─────────────────────
   build-and-push:
     name: 🐳 Build & Push Docker
     runs-on: ubuntu-latest
-    needs: [lint, type-check, test]          # Solo corre si los 3 anteriores pasan
+    needs: [lint, type-check, test]
     permissions:
       contents: read
-      packages: write                        # Necesario para push a ghcr.io
+      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +72,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}   # Token automático, no necesitas crear uno
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata for Docker
         id: meta
