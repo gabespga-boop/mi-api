@@ -34,7 +34,7 @@ jobs:
       - run: pip install mypy fastapi
       - run: mypy src/
 
-  test:
+test:
     name: 🧪 Tests
     runs-on: ubuntu-latest
     steps:
@@ -42,8 +42,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pytest httpx fastapi uvicorn httpx2
-      - run: pytest tests/ -v
+      - name: Install dependencies
+        run: |
+          pip install pytest httpx fastapi uvicorn httpx2
+          pip install -e .        
+      - name: Run tests
+        run: pytest tests/ -v
 
   build-and-push:
     name: 🐳 Build & Push Docker
